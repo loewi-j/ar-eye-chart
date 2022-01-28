@@ -1,17 +1,18 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <div class="title"><span><b>AR</b>视力表</span></div>
+    <web-cam />
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import WebCam from "@/components/WebCam";
 
 export default {
   name: 'app',
   components: {
-    HelloWorld
+    WebCam,
+    // HelloWorld
   }
 }
 </script>
@@ -23,6 +24,21 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+}
+.title {
+  height: 90px;
+  width: 100%;
+  line-height: 90px;
+  /*margin-top: 60px;*/
+  background-color: var(--purple);
+
+}
+
+.title span {
+  font-size: 30px;
+  background: -webkit-linear-gradient(to right, var(--pink), var(--white));
+  background: linear-gradient(to right, var(--pink),var(--white));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 </style>
