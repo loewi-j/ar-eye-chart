@@ -42,7 +42,7 @@ export default {
   watch: {
     type(event) {
       this.fireworkStop()
-      console.log(this.particles)
+      // console.log(this.particles)
       // this.stage.removeChild(this.particles)
       if (this.scale > 0.2)
         this.scale -= 0.05

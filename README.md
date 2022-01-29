@@ -6,6 +6,7 @@
 + 互动层，createjs
 + 算法层，tf.js及knnClassifier模型与mobilenet模型
 
+
 ## Project setup
 ```
 npm install
