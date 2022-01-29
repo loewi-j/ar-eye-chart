@@ -26,7 +26,11 @@ export default {
       logo: null,
       bgImg: null,
       scale: 1,
-      logoFlag: false
+      logoFlag: false,
+      t: 0,
+      grid: [],
+      frame: 1,
+      particles: 0
     }
   },
   props: {
@@ -37,11 +41,16 @@ export default {
   },
   watch: {
     type(event) {
+      this.fireworkStop()
+      console.log(this.particles)
+      // this.stage.removeChild(this.particles)
       if (this.scale > 0.2)
         this.scale -= 0.05
       this.text.scaleX = this.scale;
       this.text.scaleY = this.scale;
       this.text.rotation = this.rotationList[this.type]
+      // this.stage.addChild(this.text)
+
       this.scoreDisc.text = '得分：' + this.score
       this.stage.update();
     },
@@ -73,7 +82,8 @@ export default {
       this.intervalId = setInterval(this.Timing, 1000);
 
       createjs.Ticker.on("tick", this.tick);
-      createjs.Ticker.setFPS(30);
+      createjs.Ticker.setFPS(20);
+      this.firework()
 
       this.stage.update()
     },
@@ -81,11 +91,11 @@ export default {
       if (this.logo.scaleX >= 2.2 || this.logo.scaleX <= 1.9)
         this.logoFlag = !this.logoFlag
       if (this.logoFlag) {
-        this.logo.scaleX = this.logo.scaleX + 0.01;
-        this.logo.scaleY = this.logo.scaleY + 0.01;
+        this.logo.scaleX = this.logo.scaleX + 0.017;
+        this.logo.scaleY = this.logo.scaleY + 0.017;
       } else {
-        this.logo.scaleX = this.logo.scaleX - 0.01;
-        this.logo.scaleY = this.logo.scaleY - 0.01;
+        this.logo.scaleX = this.logo.scaleX - 0.017;
+        this.logo.scaleY = this.logo.scaleY - 0.017;
 
       }
       this.stage.update(event); // important!!
@@ -93,6 +103,8 @@ export default {
     play(event) {
       this.clear()
       this.scale = 1
+      createjs.Ticker.off("tick");
+      createjs.Ticker.on("tick", this.tickFireWork);
 
       //加载图片
       const bgImg = new Image();
@@ -194,10 +206,116 @@ export default {
       this.stage.removeChild(this.timeDisc)
       this.stage.removeChild(this.bgImg)
       this.stage.removeChild(this.button)
-
       this.stage.update(event);
 
     },
+    fireworkPlay() {
+      this.stage.removeChild(this.text)
+      this.stage.addChild(this.particles);
+    },
+    fireworkStop() {
+      console.log('stop---')
+      this.stage.removeChild(this.particles)
+      this.stage.addChild(this.text);
+    },
+
+    firework() {
+      this.grid = this.buildGrid();
+      // let clear = this.stage.addChild(new createjs.Shape());
+      this.particles = new createjs.Container()
+      // createjs.Ticker.setFPS(20);
+    },
+    buildGrid() {
+      let grid = [];
+      for (let x = 0; x < 1; x++) {
+        let col = grid[x] = [];
+        for (let y = 0; y < 3; y++) {
+          col[y] = this.rnd() < 0.3 ? {
+            shape: this.rnd(3),
+            note: this.rnd(5),
+            color: '#4f68b0',
+            value: y / (5 - 1)
+          } : null;
+        }
+      }
+      return grid;
+    },
+    tickFireWork(event) {
+      // this.t += event.delta;
+      this.drawFrame(this.grid[0]);
+      // this.nextT = this.t + 200;
+      // this.stage.update(event);
+      this.update(event.delta / 4);
+    },
+    update(m) {
+      const w = this.stage.canvas.width
+      const h = this.stage.canvas.height
+      const r = 16
+
+      let parts = this.particles.children;
+      for (let i = parts.length - 1; i >= 0; i--) {
+        let p = parts[i];
+        if (p.alpha < 1) {
+          p.alpha += 0.01;
+        }
+        p.x += p.velX;
+        p.velX *= 0.95;
+        p.velY *= 0.95;
+        p.y += p.velY;
+        p.rotation += p.velR;
+        p.velY += 0.15;
+        p.regX += p.velRegX;
+        p.alpha -= 0.03;
+        if (p.alpha < 0 || p.y > h + r || p.x < -r || p.x > w + r) {
+          parts.splice(i, 1);
+        }
+      }
+      this.stage.update();
+    },
+
+    drawFrame(col) {
+      for (let row = 0; row < col.length; row++) {
+        let o = col[row];
+        if (!o) {
+          continue;
+        }
+        let shape = new createjs.Shape();
+        this.drawShape(shape.graphics, o.color, o.shape);
+        this.particles.addChild(shape);
+
+        shape.x = 200;
+        shape.y = 200;
+        shape.alpha = this.rnd(0.5, 1);
+        let a = this.rnd(Math.PI * 2);
+        shape.velX = Math.cos(a) * (5 + this.rnd(20));
+        shape.velY = Math.sin(a) * (5 + this.rnd(20));
+        shape.velRegX = this.rnd(-1.5, 1.5);
+        shape.velR = this.rnd(-10, 10);
+      }
+    },
+
+    drawShape(g, color, shape) {
+      const r = 14
+      g.c().f(color);
+      if (false && shape === 0) {
+        g.dc(r, 0, r * 0.6);
+      } else if (false && shape === 1) {
+        g.dr(-r * 0.5, -r * 0.5, r, r);
+      } else {
+        g.dp(0, 0.2 * this.rnd(r * -2, r * 2), r, 5, 0.6);
+      }
+    },
+
+    rnd(min, max) {
+      if (max === undefined) {
+        max = min;
+        min = 0;
+      }
+      if (max === undefined) {
+        max = 1;
+      }
+      return min + Math.random() * (max - min);
+    }
   }
 }
 </script>

@@ -38,7 +38,9 @@
 
 <script>
 import * as tf from '@tensorflow/tfjs'
+//使用ImageNet 数据库中的标签对图像进行分类。
 import * as mobilenet from '@tensorflow-models/mobilenet'
+//这个包提供了一个使用 K-最近邻算法创建分类器的实用程序。可用于迁移学习。
 import * as knnClassifier from '@tensorflow-models/knn-classifier'
 import Create2D from '@/components/Create2D.vue'
 import Direction from "@/components/Direction";
@@ -169,8 +171,13 @@ export default {
           this.console = `prediction: ${classes[result.classIndex]}\n`;
           if (result.classIndex === this.type) {
             this.score++
+            // 庆祝动画
+            this.$refs.cam.fireworkPlay()
             // 继续游戏
-            await this.bindPlaying();
+            setTimeout(async () =>{
+              this.$refs.cam.fireworkStop()
+              await this.bindPlaying();
+            }, 500);
             break;
           }
         }
